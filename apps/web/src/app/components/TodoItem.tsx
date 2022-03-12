@@ -4,32 +4,22 @@ import {
   Heading,
   Input,
   useOutsideClick,
+  useToast,
 } from "@chakra-ui/react"
-import { Todo } from "@tododo/contract"
+import { JsendError, Todo } from "@tododo/contract"
 import React, { useRef, useState } from "react"
 import { CloseIcon } from "@chakra-ui/icons"
 import { useDeleteTodo, useUpdateTodo } from "@tododo/app-core"
-import { useQueryClient } from "react-query"
 
 interface TodoItemProps {
   todo: Todo
 }
 
 const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
-  const [todoEdit, setTodoEdit] = useState<Todo | null>(null)
-  const queryClient = useQueryClient()
-
-  const { mutate: updateTodo } = useUpdateTodo({
-    onSettled: () => {
-      setTodoEdit(null)
-      queryClient.invalidateQueries("todoList")
-    },
-  })
-  const { mutate: deleteTodo } = useDeleteTodo({
-    onSettled: () => queryClient.invalidateQueries("todoList"),
-  })
-
   const ref = useRef(null)
+  const toast = useToast()
+  const [todoEdit, setTodoEdit] = useState<Todo | null>(null)
+
   useOutsideClick({
     ref,
     handler: () => {
@@ -37,6 +27,25 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
         handleUpdate()
       }
     },
+  })
+
+  const handleError = (err: JsendError) => {
+    toast({
+      title: "Error",
+      description: err.message,
+      status: "error",
+      duration: 3000,
+      isClosable: true,
+    })
+  }
+
+  const { mutate: updateTodo } = useUpdateTodo(
+    { onSettled: () => setTodoEdit(null) },
+    { onError: handleError },
+  )
+
+  const { mutate: deleteTodo } = useDeleteTodo({
+    onError: handleError,
   })
 
   const handleUpdate = () => {
@@ -60,6 +69,10 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
     deleteTodo(todo._id)
   }
 
+  const handleSelect = () => {
+    setTodoEdit(todo)
+  }
+
   return (
     <Flex
       position="relative"
@@ -79,7 +92,6 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
           onKeyPress={(e) => {
             if (e.key === "Enter") {
               handleUpdate()
-              setTodoEdit(null)
             }
           }}
         />
@@ -87,9 +99,7 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
         <Heading
           as="h3"
           size="md"
-          onClick={() => {
-            setTodoEdit(todo)
-          }}
+          onClick={handleSelect}
           textDecoration={todo.completed ? "line-through" : "none"}
           width="full">
           {todo.content}
@@ -99,9 +109,7 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
         isChecked={todo.completed}
         rounded="full"
         size="lg"
-        onChange={() => {
-          handleCheck(!todo.completed)
-        }}
+        onChange={() => handleCheck(!todo.completed)}
       />
       <Flex
         zIndex={1}

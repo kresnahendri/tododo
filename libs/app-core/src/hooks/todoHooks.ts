@@ -17,6 +17,7 @@ import {
   useQuery,
   UseQueryOptions,
   UseMutationOptions,
+  useQueryClient,
 } from "react-query"
 
 type QueryOptions<T> =
@@ -51,31 +52,51 @@ export const useTodo = (id: string, opts?: QueryOptions<Todo>) => {
 }
 
 export const useUpdateTodo = (
+  additionalOpts: { onSettled: () => void },
   opts?: MutationOptions<Todo, { id: string; payload: UpdateTodoRequest }>,
 ) => {
+  const queryClient = useQueryClient()
   return useMutation(
     (params) =>
       updateTodo(params.id, params.payload)
         .then((res) => res.data)
         .then((res) => res.todo),
-    opts,
+    {
+      onSettled: () => {
+        additionalOpts.onSettled()
+        queryClient.invalidateQueries("todoList")
+      },
+      ...opts,
+    },
   )
 }
 
 export const useCreateTodo = (
   opts?: MutationOptions<Todo, CreateTodoRequest>,
 ) => {
+  const queryClient = useQueryClient()
   return useMutation(
     (content) =>
       createTodo(content)
         .then((res) => res.data)
         .then((res) => res.todo),
-    opts,
+    {
+      onSettled: () => {
+        queryClient.invalidateQueries("todoList")
+      },
+      ...opts,
+    },
   )
 }
 
 export const useDeleteTodo = (
   opts?: MutationOptions<DeleteTodoResponse, string>,
 ) => {
-  return useMutation((id) => deleteTodo(id), opts)
+  const queryClient = useQueryClient()
+  return useMutation((id) => deleteTodo(id), {
+    onSettled: () => {
+      queryClient.invalidateQueries("todoList")
+    },
+    ...opts,
+  })
 }

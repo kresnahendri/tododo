@@ -1,14 +1,21 @@
-import { Box, Input } from "@chakra-ui/react"
+import { Box, Input, useToast } from "@chakra-ui/react"
 import { useCreateTodo } from "@tododo/app-core"
 import React, { useState } from "react"
-import { useQueryClient } from "react-query"
 
 const TodoInput: React.FC = () => {
   const [content, setContent] = useState("")
-  const queryClient = useQueryClient()
+  const toast = useToast()
   const { mutate: createTodo, isLoading } = useCreateTodo({
     onSuccess: () => setContent(""),
-    onSettled: () => queryClient.invalidateQueries("todoList"),
+    onError(err) {
+      toast({
+        title: "Error",
+        description: err.message,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      })
+    },
   })
   return (
     <Box>
