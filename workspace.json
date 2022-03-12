@@ -1,7 +1,13 @@
 {
   "version": 2,
-  "projects": {},
-  "cli": {
-    "defaultCollection": "@nrwl/workspace"
+  "projects": {
+    "api": "apps/api",
+    "api-client": "libs/api-client",
+    "app-core": "libs/app-core",
+    "contract": "libs/contract",
+    "mobile": "apps/mobile",
+    "mobile-e2e": "apps/mobile-e2e",
+    "web": "apps/web",
+    "web-e2e": "apps/web-e2e"
   }
 }

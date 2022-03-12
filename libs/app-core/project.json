@@ -1,0 +1,23 @@
+{
+  "root": "libs/app-core",
+  "sourceRoot": "libs/app-core/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/app-core/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/app-core"],
+      "options": {
+        "jestConfig": "libs/app-core/jest.config.js",
+        "passWithNoTests": true
+      }
+    }
+  }
+}

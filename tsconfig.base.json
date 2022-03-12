@@ -14,7 +14,11 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@tododo/api-client": ["libs/api-client/src/index.ts"],
+      "@tododo/app-core": ["libs/app-core/src/index.ts"],
+      "@tododo/contract": ["libs/contract/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }
