@@ -1,9 +1,12 @@
 import { ChakraProvider, extendTheme } from "@chakra-ui/react"
+import { initApiClientConfig } from "@tododo/api-client"
 import { StrictMode } from "react"
 import * as ReactDOM from "react-dom"
 import { QueryClient, QueryClientProvider } from "react-query"
 import { BrowserRouter } from "react-router-dom"
 import App from "./app/app"
+
+initApiClientConfig({ apiUrl: process.env["NX_API_URL"] || "" })
 
 const chakraTheme = extendTheme({
   shadows: {

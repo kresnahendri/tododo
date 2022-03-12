@@ -1,4 +1,4 @@
-import { Box, Input, useToast } from "@chakra-ui/react"
+import { Box, Input, useToast } from "native-base"
 import { useCreateTodo } from "@tododo/app-core"
 import React, { useState } from "react"
 
@@ -8,7 +8,7 @@ const TodoInput: React.FC = () => {
   const { mutate: createTodo, isLoading } = useCreateTodo({
     onSuccess: () => setContent(""),
     onError(err) {
-      toast({
+      toast.show({
         title: "Error",
         description: err.message,
         status: "error",
@@ -20,20 +20,14 @@ const TodoInput: React.FC = () => {
   return (
     <Box>
       <Input
-        width="full"
+        size="2xl"
         value={content}
         placeholder="What are you gonna do?"
         borderRadius={0}
-        onChange={(e) => {
-          setContent(e.target.value)
-        }}
-        onKeyPress={(e) => {
-          if (e.key === "Enter" && content.length > 0) {
-            createTodo({ content })
-          }
-        }}
+        onChangeText={(value) => setContent(value)}
+        onSubmitEditing={() => createTodo({ content })}
         mb="8"
-        disabled={isLoading}
+        isDisabled={isLoading}
       />
     </Box>
   )
