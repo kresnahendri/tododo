@@ -8,6 +8,8 @@ import {
 import { Todo } from "@tododo/contract"
 import React, { useRef, useState } from "react"
 import { CloseIcon } from "@chakra-ui/icons"
+import { useDeleteTodo, useUpdateTodo } from "@tododo/app-core"
+import { useQueryClient } from "react-query"
 
 interface TodoItemProps {
   todo: Todo
@@ -15,6 +17,18 @@ interface TodoItemProps {
 
 const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
   const [todoEdit, setTodoEdit] = useState<Todo | null>(null)
+  const queryClient = useQueryClient()
+
+  const { mutate: updateTodo } = useUpdateTodo({
+    onSettled: () => {
+      setTodoEdit(null)
+      queryClient.invalidateQueries("todoList")
+    },
+  })
+  const { mutate: deleteTodo } = useDeleteTodo({
+    onSettled: () => queryClient.invalidateQueries("todoList"),
+  })
+
   const ref = useRef(null)
   useOutsideClick({
     ref,
@@ -26,19 +40,24 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
   })
 
   const handleUpdate = () => {
-    // TODO: update todo
+    updateTodo({
+      id: todo._id,
+      payload: {
+        completed: todoEdit?.completed,
+        content: todoEdit?.content,
+      },
+    })
   }
 
-  const handleCheck = () => {
-    // TODO: update todo
-  }
-
-  const handleUncheck = () => {
-    // TODO: update todo
+  const handleCheck = (completed: boolean) => {
+    updateTodo({
+      id: todo._id,
+      payload: { completed },
+    })
   }
 
   const handleDelete = () => {
-    // TODO: delete todo
+    deleteTodo(todo._id)
   }
 
   return (
@@ -68,22 +87,20 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
         <Heading
           as="h3"
           size="md"
-          onClick={() => setTodoEdit(todo)}
-          textDecoration={todo.completed ? "line-through" : "none"}>
+          onClick={() => {
+            setTodoEdit(todo)
+          }}
+          textDecoration={todo.completed ? "line-through" : "none"}
+          width="full">
           {todo.content}
         </Heading>
       )}
-
       <Checkbox
         isChecked={todo.completed}
         rounded="full"
         size="lg"
         onChange={() => {
-          if (todo.completed) {
-            handleUncheck()
-          } else {
-            handleCheck()
-          }
+          handleCheck(!todo.completed)
         }}
       />
       <Flex

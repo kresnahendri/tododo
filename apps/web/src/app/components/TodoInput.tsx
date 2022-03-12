@@ -1,11 +1,15 @@
 import { Box, Input } from "@chakra-ui/react"
+import { useCreateTodo } from "@tododo/app-core"
 import React, { useState } from "react"
+import { useQueryClient } from "react-query"
 
-interface TodoInputProps {
-  onSubmit: (value: string) => void
-}
-const TodoInput: React.FC<TodoInputProps> = ({ onSubmit }) => {
+const TodoInput: React.FC = () => {
   const [content, setContent] = useState("")
+  const queryClient = useQueryClient()
+  const { mutate: createTodo, isLoading } = useCreateTodo({
+    onSuccess: () => setContent(""),
+    onSettled: () => queryClient.invalidateQueries("todoList"),
+  })
   return (
     <Box>
       <Input
@@ -17,10 +21,11 @@ const TodoInput: React.FC<TodoInputProps> = ({ onSubmit }) => {
         }}
         onKeyPress={(e) => {
           if (e.key === "Enter" && content.length > 0) {
-            onSubmit(content)
+            createTodo({ content })
           }
         }}
         mb="8"
+        disabled={isLoading}
       />
     </Box>
   )

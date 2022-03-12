@@ -1,29 +1,23 @@
-import { Container, Heading } from "@chakra-ui/react"
-import { getTodoList } from "@tododo/api-client"
-import { Todo } from "@tododo/contract"
-import { useEffect, useState } from "react"
+import { Center, Container, Heading, Spinner } from "@chakra-ui/react"
+import { useTodoList } from "@tododo/app-core"
 import TodoInput from "./components/TodoInput"
 import TodoItem from "./components/TodoItem"
 
 export function App() {
-  const handleCreateTodo = (todoContent: string) => {
-    // TODO: create todo
-  }
-  const [todoList, setTodoList] = useState<Todo[]>([])
-
-  useEffect(() => {
-    getTodoList()
-      .then((res) => res.data.todos)
-      .then(setTodoList)
-  }, [])
+  const { data: todoList, isLoading: isLodingTodoList } = useTodoList()
 
   return (
     <Container p="4">
       <Heading mb="3" textAlign="center">
         Tododo
       </Heading>
-      <TodoInput onSubmit={handleCreateTodo} />
-      {todoList.map((todo) => {
+      <TodoInput />
+      {isLodingTodoList && (
+        <Center>
+          <Spinner size="xl" />
+        </Center>
+      )}
+      {todoList?.map((todo) => {
         return <TodoItem key={todo._id} todo={todo} />
       })}
     </Container>

@@ -20,7 +20,9 @@ export class TodoService {
   }
 
   getList(): Observable<Todo[]> {
-    return from(this.todoModel.find()).pipe(
+    return from(
+      this.todoModel.find().sort({ field: "asc", createdAt: -1 }),
+    ).pipe(
       map((todos) => {
         if (Array.isArray(todos)) {
           return todos.map((todoDoc) => {
@@ -53,6 +55,6 @@ export class TodoService {
   }
 
   delete(_id: string): Observable<unknown> {
-    return from(this.todoModel.deleteOne({ id: _id }))
+    return from(this.todoModel.deleteOne({ _id }))
   }
 }
