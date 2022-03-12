@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common"
 import { InjectModel } from "@nestjs/mongoose"
-import { CreateTodoRequest, UpdateTodoRequest } from "@tododo/contract"
+import { CreateTodoRequest, UpdateTodoRequest, Todo } from "@tododo/contract"
 import { Model } from "mongoose"
-import { from } from "rxjs"
+import { from, Observable, map } from "rxjs"
 import { TodoDocument, TodoClass } from "./todo.entity"
 
 @Injectable()
@@ -11,23 +11,48 @@ export class TodoService {
     @InjectModel(TodoClass.name) private todoModel: Model<TodoDocument>,
   ) {}
 
-  getList() {
-    return from(this.todoModel.find())
+  private mapTodoDocToTodo(todoDoc: TodoDocument): Todo {
+    return {
+      _id: todoDoc._id,
+      content: todoDoc.content,
+      completed: todoDoc.completed,
+    }
   }
 
-  get(_id: string) {
-    return from(this.todoModel.find({ _id }))
+  getList(): Observable<Todo[]> {
+    return from(this.todoModel.find()).pipe(
+      map((todos) => {
+        if (Array.isArray(todos)) {
+          return todos.map((todoDoc) => {
+            return this.mapTodoDocToTodo(todoDoc)
+          })
+        }
+        return [this.mapTodoDocToTodo(todos)]
+      }),
+    )
   }
 
-  create(todo: CreateTodoRequest) {
-    return from(new this.todoModel(todo).save())
+  get(_id: string): Observable<Todo> {
+    return from(this.todoModel.findOne({ _id })).pipe(
+      map((todoDoc) => {
+        return this.mapTodoDocToTodo(todoDoc)
+      }),
+    )
   }
 
-  update(_id: string, todo: UpdateTodoRequest) {
-    return from(this.todoModel.findByIdAndUpdate(_id, todo))
+  create(todo: CreateTodoRequest): Observable<Todo> {
+    return from(new this.todoModel(todo).save()).pipe(
+      map((todoDoc) => this.mapTodoDocToTodo(todoDoc)),
+    )
   }
 
-  delete(_id: string) {
+  update(_id: string, todo: UpdateTodoRequest): Observable<Todo> {
+    return from(this.todoModel.findByIdAndUpdate(_id, todo)).pipe(
+      map((todoDoc) => this.mapTodoDocToTodo(todoDoc)),
+    )
+  }
+
+  delete(_id: string): Observable<unknown> {
     return from(this.todoModel.deleteOne({ id: _id }))
   }
 }

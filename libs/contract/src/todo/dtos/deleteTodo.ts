@@ -1,7 +1,4 @@
 import { Jsend } from "../../common/jsend"
+import { Todo } from "../models/todo"
 
-export interface DeleteTodoRequest {
-  id: string
-}
-
-export type DeleteTodoResponse = Jsend<null>
+export type DeleteTodoResponse = Jsend<Pick<Todo, "_id">>
