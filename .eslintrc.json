@@ -8,7 +8,8 @@
     "class-methods-use-this": "off",
     "no-useless-constructor": "off",
     "import/no-unresolved": "off",
-    "react/function-component-definition": "off"
+    "react/function-component-definition": "off",
+    "dot-notation": "off"
   },
   "ignorePatterns": ["**/*"],
   "plugins": ["@nrwl/nx"],
